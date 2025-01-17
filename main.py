@@ -14,6 +14,7 @@ for col in columns_to_clean:
     # Convert column to a numeric data type
     df[col] = pd.to_numeric(df[col])
 df['Release_Date'] = pd.to_datetime(df['Release_Date'])
+
 avarage_budget = df['USD_Production_Budget'].mean() 
 #min of Worldwide gross and domestic gross
 min_world_wide_Gross=df['USD_Worldwide_Gross'].min()
@@ -30,15 +31,28 @@ zero_domestic=df.query('USD_Domestic_Gross==0')
 grossed_nothing_budget=df.query('USD_Production_Budget==0')
 #have budget but zero dpmestic
 worldwide_released=df.query('USD_Domestic_Gross==0 & USD_Worldwide_Gross!=0')
-print(f'Number of international releases: {len(worldwide_released)}')
-print(worldwide_released.tail())
+#print(f'Number of international releases: {len(worldwide_released)}')
+#print(worldwide_released.tail())
 #identigy which films were not released yet as of the time of data collection (May 1st, 2018)
 future_releases=df.query('Release_Date>= "2018-05-01"')
-print(f'Number of un-released movies: {len(future_releases)}')
-print(future_releases.head())
+#print(f'Number of un-released movies: {len(future_releases)}')
+#print(future_releases.head())
 #drop all these movies
 df_clean=df.drop(future_releases.index)
-#films tat lost money
+#films that lost money
 money_lost=df_clean.query('USD_Worldwide_Gross<USD_Production_Budget')
 percent_lost=(len(money_lost)/len(df_clean))*100
-print(f'Percentage of movies that lost money: {round(percent_lost,2)}')
+#print(f'Percentage of movies that lost money: {round(percent_lost,2)}')
+plt.figure(figsize=(8,4), dpi=110)
+with sns.axes_style("darkgrid"):
+    ax = sns.scatterplot(data=df_clean, 
+                    x='Release_Date', 
+                    y='USD_Production_Budget',
+                    hue='USD_Worldwide_Gross',
+                    size='USD_Worldwide_Gross',)
+ 
+    ax.set(ylim=(0, 450000000),
+           xlim=(df_clean.Release_Date.min(), df_clean.Release_Date.max()),
+           xlabel='Year',
+           ylabel='Budget in $100 millions')
+plt.show()
