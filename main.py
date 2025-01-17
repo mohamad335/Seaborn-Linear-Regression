@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas import DatetimeIndex
 import matplotlib.pyplot as plt
 import seaborn as sns
 df=pd.read_csv('data/cost_revenue_dirty.csv')
@@ -43,16 +44,47 @@ df_clean=df.drop(future_releases.index)
 money_lost=df_clean.query('USD_Worldwide_Gross<USD_Production_Budget')
 percent_lost=(len(money_lost)/len(df_clean))*100
 #print(f'Percentage of movies that lost money: {round(percent_lost,2)}')
-plt.figure(figsize=(8,4), dpi=110)
-with sns.axes_style("darkgrid"):
-    ax = sns.scatterplot(data=df_clean, 
-                    x='Release_Date', 
-                    y='USD_Production_Budget',
-                    hue='USD_Worldwide_Gross',
-                    size='USD_Worldwide_Gross',)
- 
-    ax.set(ylim=(0, 450000000),
-           xlim=(df_clean.Release_Date.min(), df_clean.Release_Date.max()),
-           xlabel='Year',
-           ylabel='Budget in $100 millions')
-plt.show()
+#create a scatter plot by using a seaborn library 
+def scatter_plot():
+    plt.figure(figsize=(8,4), dpi=110)
+    with sns.axes_style("darkgrid"):
+        ax = sns.scatterplot(data=df_clean, 
+                        x='Release_Date', 
+                        y='USD_Production_Budget',
+                        hue='USD_Worldwide_Gross',
+                        size='USD_Worldwide_Gross',)
+    
+        ax.set(ylim=(0, 450000000),
+            xlim=(df_clean.Release_Date.min(), df_clean.Release_Date.max()),
+            xlabel='Year',
+            ylabel='Budget in $100 millions')
+    plt.savefig('images/scatter_plot.png')
+    plt.show()
+df_time=DatetimeIndex(df_clean.Release_Date)
+year=df_time.year
+decades_year=year//10*10
+df_clean['Decade']=decades_year
+old_films=df_clean[df_clean.Decade<=1960]
+new_films=df_clean[df_clean.Decade >1960]
+def old_film():
+    plt.figure(figsize=(8, 4), dpi=110)
+    with sns.axes_style('darkgrid'):
+        sns.regplot(data=old_films,
+                    x='USD_Production_Budget',
+                    y='USD_Worldwide_Gross',
+                    scatter_kws={'alpha': 0.4},
+                    line_kws={'color': 'black'})
+    plt.savefig('images/old_films.png')
+    plt.show()
+def new_film():
+    plt.figure(figsize=(8, 4), dpi=110)
+    with sns.axes_style('darkgrid'):
+        sns.regplot(data=new_films,
+                    x='USD_Production_Budget',
+                    y='USD_Worldwide_Gross',
+                    color='#2f4b7c',
+                    scatter_kws={'alpha': 0.4},
+                    line_kws={'color': '#ff7c43'})
+    plt.savefig('images/new_films.png')
+    plt.show()
+new_film()
