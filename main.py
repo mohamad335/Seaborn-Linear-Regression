@@ -2,6 +2,7 @@ import pandas as pd
 from pandas import DatetimeIndex
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.linear_model import LinearRegression
 df=pd.read_csv('data/cost_revenue_dirty.csv')
 chars_to_remove = [',', '$']
 columns_to_clean = ['USD_Production_Budget', 
@@ -87,4 +88,26 @@ def new_film():
                     line_kws={'color': '#ff7c43'})
     plt.savefig('images/new_films.png')
     plt.show()
-new_film()
+
+regression=LinearRegression()
+# Explanatory Variable(s) or Feature(s)
+X = pd.DataFrame(new_films, columns=['USD_Production_Budget'])
+# Response Variable or Target
+y = pd.DataFrame(new_films, columns=['USD_Worldwide_Gross'])
+regression.fit(X, y)
+print(regression.intercept_)
+print(regression.coef_)
+print(regression.score(X, y))
+#linear regression for old_films
+x=pd.DataFrame(old_films,columns=['USD_Production_Budget'])
+y=pd.DataFrame(old_films,columns=['USD_Worldwide_Gross'])
+regression.fit(x, y)
+print(f"the slope cooficient is: {regression.coef_[0]}")
+print(f"the intercept cooficient is: {regression.intercept_}")
+print(f"the R-squared is: {regression.score(x, y)}")
+#calculate the estimate about 350 million $
+budget=350000000
+revenue_estimate=regression.intercept_[0]+regression.coef_[0,0]*budget
+print(f"the estimated revenue for a $350 film is: {round(revenue_estimate, -6)/1000000} million $")
+
+
